@@ -1,0 +1,24 @@
+{
+    "name": "expressjs-replication",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "watch": "nodemon --watch '**/*.ts' --ignore '**/*.spec.ts' --exec 'ts-node' main.ts"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@types/express": "^4.17.13",
+        "@types/node": "^16.9.2",
+        "class-transformer": "^0.4.0",
+        "class-validator": "^0.13.1",
+        "express": "^4.17.1",
+        "nodemon": "^2.0.13",
+        "reflect-metadata": "^0.1.13",
+        "ts-node": "^10.2.1",
+        "tsconfig-paths": "^3.11.0",
+        "typescript": "^4.4.3"
+    }
+}
