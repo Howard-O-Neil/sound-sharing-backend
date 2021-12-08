@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=sound-sharing
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data:/var/lib/postgresql/data/pgdata
+    networks:
+      sound-sharing-network:
+        ipv4_address: 128.0.2.2
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      sound-sharing-network:
+        ipv4_address: 128.0.2.3
+
+networks:
+  sound-sharing-network:
+    ipam:
+      driver: default
+      config:
+        - subnet: "128.0.2.0/24"
