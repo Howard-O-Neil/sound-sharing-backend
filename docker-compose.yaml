@@ -27,11 +27,18 @@ services:
         ipv4_address: 128.0.2.3
   
   sound-sharing-backend:
-    image: ubuntu:18.04@sha256:fc0d6af5ab38dab33aa53643c4c4b312c6cd1f044c1a2229b2743b252b9689fc
+    build:
+      context: ./docker
+      dockerfile: node16.9.1.Dockerfile
+    volumes:
+      - ./src:/home/root/src:rw
+      - ./container_share.log:/home/root/container_share.log
     depends_on:
       - adminer
-    
-
+    entrypoint: ["tail", "-f", "/home/root/container_share.log"]
+    networks:
+      sound-sharing-network:
+        ipv4_address: 128.0.2.4
 
 networks:
   sound-sharing-network:
