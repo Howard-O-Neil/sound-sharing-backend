@@ -18,11 +18,20 @@ services:
   adminer:
     image: adminer
     restart: always
+    depends_on:
+      - db
     ports:
       - 8080:8080
     networks:
       sound-sharing-network:
         ipv4_address: 128.0.2.3
+  
+  sound-sharing-backend:
+    image: ubuntu:18.04@sha256:fc0d6af5ab38dab33aa53643c4c4b312c6cd1f044c1a2229b2743b252b9689fc
+    depends_on:
+      - adminer
+    
+
 
 networks:
   sound-sharing-network:
