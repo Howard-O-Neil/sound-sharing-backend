@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
+        "exe": "ts-node -r tsconfig-paths/register",
         "watch": "nodemon --watch '**/*.ts' --ignore '**/*.spec.ts' --exec 'ts-node' main.ts"
     },
     "author": "",
@@ -19,8 +20,10 @@
         "pg": "^8.7.1",
         "reflect-metadata": "^0.1.13",
         "ts-node": "^10.2.1",
-        "tsconfig-paths": "^3.11.0",
         "typeorm": "^0.2.41",
         "typescript": "^4.4.3"
+    },
+    "devDependencies": {
+        "tsconfig-paths": "^3.12.0"
     }
 }

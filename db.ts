@@ -1,5 +1,5 @@
 import "reflect-metadata"
-import { createConnection } from "typeorm";
+import { createConnection } from "@/node_modules/typeorm/index";
 
 createConnection().then(connection => {
   // here you can start to work with your entities

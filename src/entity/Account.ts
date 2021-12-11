@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "@/node_modules/typeorm/index";
 import { DBObject } from "./DBObject";
 
 @Entity()

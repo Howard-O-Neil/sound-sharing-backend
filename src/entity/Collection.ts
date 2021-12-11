@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "@/node_modules/typeorm/index";
 import { Account } from "./Account";
 import { DBObject } from "./DBObject";
 
