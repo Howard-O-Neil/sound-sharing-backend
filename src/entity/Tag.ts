@@ -1,10 +1,16 @@
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { DBObject } from "./DBObject";
+import { TagType } from "./TagType";
 
 @Entity()
-export class Tag {
+export class Tag extends DBObject {
   @PrimaryGeneratedColumn("uuid")
   id: string | undefined;
 
-  @Column()
+  @Column({type: "varchar", length: 500})
   name: string | undefined;
+
+  @OneToOne(() => TagType)
+  @JoinColumn()
+  tag_type: TagType| undefined;
 }

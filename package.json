@@ -16,6 +16,7 @@
         "class-validator": "^0.13.1",
         "express": "^4.17.1",
         "nodemon": "^2.0.13",
+        "pg": "^8.7.1",
         "reflect-metadata": "^0.1.13",
         "ts-node": "^10.2.1",
         "tsconfig-paths": "^3.11.0",

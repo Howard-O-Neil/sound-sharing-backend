@@ -1,10 +1,11 @@
-import express from 'express';
+// import express from 'express';
 
-export const app = express();
-const port = 3002;
+// export const app = express();
+// const port = 3002;
 
-app.get('/', (_, res) => {
-    res.send('hello world ');
-});
+// app.get('/', (_, res) => {
+//     res.send('hello world ');
+// });
 
-app.listen(port)
+// app.listen(port)
+
