@@ -8,9 +8,10 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=sound-sharing
-      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
     volumes:
-      - ./data:/var/lib/postgresql/data/pgdata
+      - ./pgdata:/var/lib/postgresql/data
     networks:
       sound-sharing-network:
         ipv4_address: 128.0.2.2

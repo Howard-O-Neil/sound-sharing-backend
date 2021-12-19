@@ -1,5 +1,6 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "@/node_modules/typeorm/index";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm"
 import { DBObject } from "./DBObject";
+import { Sound } from "./Sound";
 import { TagType } from "./TagType";
 
 @Entity()
@@ -10,7 +11,13 @@ export class Tag extends DBObject {
   @Column({type: "varchar", length: 500})
   name: string | undefined;
 
-  @OneToOne(() => TagType)
+  @ManyToOne(() => TagType)
   @JoinColumn()
-  tag_type: TagType| undefined;
+  tag_type: TagType | undefined;
+
+  constructor(name: string, type: TagType | undefined) {
+    super()
+    this.name = name
+    this.tag_type = type
+  }
 }

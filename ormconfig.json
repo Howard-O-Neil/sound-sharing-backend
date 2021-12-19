@@ -5,7 +5,7 @@
    "username": "admin",
    "password": "admin",
    "database": "sound-sharing",
-   "synchronize": true,
+   "synchronize": false,
    "logging": false,
    "entities": [
       "src/entity/**/*.ts"
@@ -15,5 +15,8 @@
    ],
    "subscribers": [
       "src/subscriber/**/*.ts"
-   ]
+   ],
+   "cli": {
+      "migrationsDir": "src/migration"
+   }
 }

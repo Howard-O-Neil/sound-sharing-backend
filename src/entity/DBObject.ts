@@ -1,4 +1,4 @@
-import { CreateDateColumn, DeleteDateColumn, UpdateDateColumn } from "@/node_modules/typeorm/index";
+import { CreateDateColumn, DeleteDateColumn, UpdateDateColumn } from "typeorm"
 
 export class DBObject {
   @CreateDateColumn()

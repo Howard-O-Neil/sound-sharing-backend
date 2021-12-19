@@ -1,10 +1,11 @@
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "@/node_modules/typeorm/index";
+import { Column, Entity, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm"
 import { Account } from "./Account";
 import { Collection } from "./Collection";
 import { DBObject } from "./DBObject";
 import { Tag } from "./Tag";
 
 @Entity()
+@Index(["account", "collection"])
 export class Sound extends DBObject {
   @PrimaryGeneratedColumn("uuid")
   id: string | undefined;
@@ -15,12 +16,20 @@ export class Sound extends DBObject {
   @Column({type: "varchar", length: 1000})
   thumbnail: string | undefined;
 
-  @ManyToOne(() => Collection)
-  @JoinColumn()
+  @Column({type: "varchar", length: 1000})
+  cdn_id: string | undefined;
+
+  @Column({type: "varchar", length: 1000})
+  stream_id: string | undefined;
+
+  @ManyToOne(type => Collection, c => c.sounds)
+  @JoinColumn() // create foreign key, point to collection
+  @Index()
   collection: Collection | undefined;
 
-  @OneToOne(() => Account)
+  @ManyToOne(() => Account)
   @JoinColumn()
+  @Index()
   account: Account | undefined
 
   @ManyToMany(() => Tag)

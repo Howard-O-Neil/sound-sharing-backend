@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import { TagType } from "@/src/entity/TagType";
-import { createConnection } from "typeorm";
+import { Conn } from "@/connection";
 
 const listType: TagType[] = []
 let idx = 0
@@ -23,9 +23,7 @@ listType[idx - 1].name = "Character"
 listType.push(new TagType()); idx++
 listType[idx - 1].name = "Emotional"
 
-
 const func = async () => {
-  let connection = await createConnection()
-  await connection.manager.save(listType)
+  (await Conn.getDBConnection()).save(listType)
 }
 func()

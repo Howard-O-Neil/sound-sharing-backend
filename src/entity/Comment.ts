@@ -4,22 +4,21 @@ import { DBObject } from "./DBObject";
 import { Sound } from "./Sound";
 
 @Entity()
-export class Collection extends DBObject {
+@Index(["account", "sound"])
+export class Comment extends DBObject {
   @PrimaryGeneratedColumn("uuid")
   id: string | undefined
 
-  @Column({type: "varchar", length: 500})
-  name: string | undefined;
-
-  @Column({type: "varchar", length: 500})
-  img_url: string | undefined
+  @Column({type: "varchar", length: 5000})
+  content: string | undefined;
 
   @OneToOne(() => Account)
   @JoinColumn()
   @Index()
   account: Account| undefined
 
-  @OneToMany(type => Sound, s => s.collection)
-  // @JoinColumn() no need, we have joined column in sound repository
-  sounds: Sound[] | undefined
+  @OneToOne(() => Sound)
+  @JoinColumn()
+  @Index()
+  sound: Sound | undefined
 }
