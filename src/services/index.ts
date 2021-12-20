@@ -1,2 +1,5 @@
 import "./SignIn"
 import "./SignUp"
+import "./SoundTag"
+import "./SaveSound"
+import "./GetSound"

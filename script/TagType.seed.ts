@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import { TagType } from "@/src/entity/TagType";
-import { Conn } from "@/connection";
+import { Conn } from "@/src/connection";
 
 const listType: TagType[] = []
 let idx = 0

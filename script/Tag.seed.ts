@@ -1,8 +1,8 @@
 import "reflect-metadata"
 import { TagType } from "@/src/entity/TagType";
 import { Tag } from "@/src/entity/Tag";
-import { Conn } from "@/connection";
 import { exit } from "process";
+import { Conn } from "@/src/connection";
 
 const func = async () => {
   const connection = await Conn.getDBConnection()

@@ -11,6 +11,7 @@ export const app = express();
 export const APP_ENDPOINT = "/sound-sharing/v1"
 export const PUBLIC_ENDPOINT = "/sound-sharing-pub/v1"
 export const ACCOUNT_ENDPOINT = "account"
+export const SOUND_ENDPOINT = "sound"
 
 app.use(express.json())
 app.use(cors())
@@ -20,22 +21,28 @@ app.use(PUBLIC_ENDPOINT, (_req, _res, next) => {
 })
 
 app.use(APP_ENDPOINT, async (req, res, next) => {
+  
   const authHeader = req.headers['authorization']
   const token = authHeader && authHeader.split(' ')[1] // remove "bearer"
 
   if (token == null) return res.sendStatus(401)
   else {
-    const accId = verifyToken(token) as JwtPayload
+    const [acc, _err] = verifyToken(token)
+
+    console.log(acc);
 
     const user = await (await Conn.getDBConnection())
       .getRepository(Account)
       .createQueryBuilder("user")
-      .where("user.id = :id", {id: accId["id"] as string})
+      .where("user.id = :id", {id: (acc as JwtPayload)["id"]})
       .getOne()
 
     if (user == undefined) {
-      res.sendStatus(400);
-    } else next();
+      res.sendStatus(401);
+    } else {
+      req.body["user-id"] = user.id;
+      next();
+    }
   }
 })
 

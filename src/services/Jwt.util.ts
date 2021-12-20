@@ -10,6 +10,10 @@ export const encodeToken = (data: any, timeInSec: number) => {
       expiresIn: timeInSec})
 }
 
+export const encodeTokenNoSecret = (data: any, timeInSec: number) => {
+  return jwt.sign(data, "abcd1234")
+}
+
 export const verifyToken = (token: any) : [jwt.JwtPayload | string | null, Error | null] => {
   let payload: jwt.JwtPayload | string | null = null;
 

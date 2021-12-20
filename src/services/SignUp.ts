@@ -3,10 +3,11 @@ import { Conn } from "../connection";
 import { Account } from "../entity/Account";
 import { EmailVerification } from "../entity/EmailVerification";
 import { ACCOUNT_ENDPOINT, app, APP_ENDPOINT, PUBLIC_ENDPOINT } from "../main";
-import { decodeToken, encodeToken, verifyToken } from "./Jwt.util";
-import {v1 as uuidv1} from "uuid";
+import { decodeToken, encodeToken, encodeTokenNoSecret, verifyToken } from "./Jwt.util";
+import { v1 as uuidv1 } from "uuid";
 import { sendMail } from "./EmailSender.util";
 import { exit } from "process";
+import { Collection } from "../entity/Collection";
 
 app.post(`${PUBLIC_ENDPOINT}/${ACCOUNT_ENDPOINT}/sign-up`, async (req, res) => {
   if (req.body["password"] !== req.body["retypePassword"]) {
@@ -26,6 +27,7 @@ app.post(`${PUBLIC_ENDPOINT}/${ACCOUNT_ENDPOINT}/sign-up`, async (req, res) => {
       "message": "Account already existed",
     }))
   } else {
+    await softDeleteEmailVerificationCaches(req.body["email"])
     const key = uuidv1()
     await performEmailVerification(req.body, key)
 
@@ -39,7 +41,7 @@ app.post(`${PUBLIC_ENDPOINT}/${ACCOUNT_ENDPOINT}/sign-up`, async (req, res) => {
 
 app.post(`${PUBLIC_ENDPOINT}/${ACCOUNT_ENDPOINT}/verify-email`, async (req, res) => {
   const verifyStatus = await verifyEmail(req.body["email"], req.body["key"])
-  
+
   if (verifyStatus[0] == -1) {
     res.status(400)
     res.send(JSON.stringify({
@@ -60,7 +62,8 @@ app.post(`${PUBLIC_ENDPOINT}/${ACCOUNT_ENDPOINT}/verify-email`, async (req, res)
     }))
   }
   else {
-    const query = await createAccount(verifyStatus[1] as SignUpAccountInfo)
+    const query = await createAccount(verifyStatus[1] as SignUpAccountInfo);
+    await createDefaultCollection(verifyStatus[1] as SignUpAccountInfo);
 
     if (query[0] == -1) {
       res.status(400)
@@ -68,7 +71,7 @@ app.post(`${PUBLIC_ENDPOINT}/${ACCOUNT_ENDPOINT}/verify-email`, async (req, res)
         "error": "400",
         "message": "Account already existed",
       }))
-    } else {  
+    } else {
       res.status(200)
       res.send(JSON.stringify({
         "status": true,
@@ -79,9 +82,11 @@ app.post(`${PUBLIC_ENDPOINT}/${ACCOUNT_ENDPOINT}/verify-email`, async (req, res)
 })
 
 app.post(`${PUBLIC_ENDPOINT}/${ACCOUNT_ENDPOINT}/resend-confirmation`, async (req, res) => {
+  await softDeleteEmailVerificationCaches(req.body["email"])
+
   const key = uuidv1();
   const verifyStatus = await resendEmailVerification(req.body["email"], key);
-  
+
   if (verifyStatus[0] == -1) {
     res.status(400)
     res.send(JSON.stringify({
@@ -89,12 +94,15 @@ app.post(`${PUBLIC_ENDPOINT}/${ACCOUNT_ENDPOINT}/resend-confirmation`, async (re
       "message": "You doesn't have any pending account",
     }))
   } else if (verifyStatus[0] == 1) {
-    await softDeleteEmailVerificationCaches(req.body["email"])
-
     res.status(200)
     res.send(JSON.stringify({
       "status": true,
       "message": "Please verify your email",
+      "old-cache": {
+        email: verifyStatus[1]?.email,
+        name: verifyStatus[1]?.name,
+        avatar_url: verifyStatus[1]?.avatar_url,
+      }
     }))
   } else {
     res.status(500)
@@ -128,11 +136,13 @@ interface CachedAccountVerification {
   key: string;
 }
 
-const checkAccount = async (account: SignUpAccountInfo): Promise<[number, String| undefined]> => {
+const JWT_TIMEOUT = 20;
+
+const checkAccount = async (account: SignUpAccountInfo): Promise<[number, String | undefined]> => {
   const user = await (await Conn.getDBConnection())
     .getRepository(Account)
     .createQueryBuilder("user")
-    .where("user.email = :email", {email: account.email})
+    .where("user.email = :email", { email: account.email })
     .getOne()
 
   if (user == undefined) {
@@ -143,11 +153,11 @@ const checkAccount = async (account: SignUpAccountInfo): Promise<[number, String
   }
 }
 
-const createAccount = async (account: SignUpAccountInfo): Promise<[number, String| undefined]> => {
+const createAccount = async (account: SignUpAccountInfo): Promise<[number, String | undefined]> => {
   const user = await (await Conn.getDBConnection())
     .getRepository(Account)
     .createQueryBuilder("user")
-    .where("user.email = :email", {email: account.email})
+    .where("user.email = :email", { email: account.email })
     .getOne()
 
   if (user == undefined) {
@@ -155,6 +165,7 @@ const createAccount = async (account: SignUpAccountInfo): Promise<[number, Strin
     newUser.email = account.email;
     newUser.password = account.password;
     newUser.name = account.name;
+    newUser.avatar_url = account.avatar_url;
 
     newUser = await (await Conn.getDBConnection()).save(newUser);
 
@@ -165,12 +176,29 @@ const createAccount = async (account: SignUpAccountInfo): Promise<[number, Strin
   }
 }
 
+const createDefaultCollection = async (account: SignUpAccountInfo): Promise<[number]> => {
+  const user = await (await Conn.getDBConnection())
+    .getRepository(Account)
+    .createQueryBuilder("user")
+    .where("user.email = :email", { email: account.email })
+    .getOne()
+
+  let collection = new Collection();
+  collection.account = user;
+  collection.img_url = account.avatar_url;
+  collection.name = "Your default playlist";
+
+  collection = await (await Conn.getDBConnection()).save(collection);
+
+  return [1]
+}
+
 const softDeleteEmailVerificationCaches = async (email: string) => {
-    await (await Conn.getDBConnection())
-      .getRepository(EmailVerification)
-      .createQueryBuilder("e")
-      .where("e.email = :email", {email: email})
-      .orderBy("e.create_at", 'DESC').softDelete();
+  await (await Conn.getDBConnection())
+    .getRepository(EmailVerification)
+    .createQueryBuilder("e")
+    .where("e.email = :email", { email: email })
+    .orderBy("e.create_at", 'DESC').softDelete();
 }
 
 const performEmailVerification = async (account: SignUpAccountInfo, key: string) => {
@@ -181,7 +209,7 @@ const performEmailVerification = async (account: SignUpAccountInfo, key: string)
     ...account,
     key
   }
-  pendingEmailVerification.token = encodeToken(encodeData, 10 * 60)
+  pendingEmailVerification.token = encodeToken(encodeData, JWT_TIMEOUT)
 
   await (await Conn.getDBConnection()).save(pendingEmailVerification);
 
@@ -197,7 +225,7 @@ const resendEmailVerification = async (email: string, key: string): Promise<[num
   const emailVerifications = await (await Conn.getDBConnection())
     .getRepository(EmailVerification)
     .createQueryBuilder("e")
-    .where("e.email = :email", {email: email})
+    .where("e.email = :email", { email: email })
     .orderBy("e.create_at", 'DESC')
     .getMany();
 
@@ -217,7 +245,7 @@ const resendEmailVerification = async (email: string, key: string): Promise<[num
   let pendingEmailVerification = new EmailVerification()
   pendingEmailVerification.email = oldCached_t.email
 
-  pendingEmailVerification.token = encodeToken(oldCached_t, 10 * 60)
+  pendingEmailVerification.token = encodeToken(oldCached_t, JWT_TIMEOUT)
 
   await (await Conn.getDBConnection()).save(pendingEmailVerification);
 
@@ -241,7 +269,7 @@ const verifyEmail = async (email: string, key: string): Promise<[number, CachedA
   const emailVerificationsQuery = (await Conn.getDBConnection())
     .getRepository(EmailVerification)
     .createQueryBuilder("e")
-    .where("e.email = :email", {email: email})
+    .where("e.email = :email", { email: email })
     .orderBy("e.create_at", 'DESC');
 
   const emailVerifications = await emailVerificationsQuery.getMany()

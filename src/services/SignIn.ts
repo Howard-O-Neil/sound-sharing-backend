@@ -22,6 +22,11 @@ app.post(`${PUBLIC_ENDPOINT}/${ACCOUNT_ENDPOINT}/sign-in`, async (req, res) => {
     res.status(200)
     res.send(JSON.stringify({
       "status": true,
+      "account": {
+        email: query[2]?.email,
+        name: query[2]?.name,
+        avatar_url: query[2]?.avatar_url,
+      },
       "token": `${encodeToken({id: query[1]}, 7 * 24 * 60 * 60)}`
     }))
   }
@@ -32,14 +37,14 @@ interface SignInAccountInfo {
   password: string;
 }
 
-const getAccount = async (account: SignInAccountInfo): Promise<[number, String| undefined]> => {
+const getAccount = async (account: SignInAccountInfo): Promise<[number, String| undefined, Account | null]> => {
   const user = await (await Conn.getDBConnection())
     .getRepository(Account)
     .createQueryBuilder("user")
     .where("user.email = :email", {email: account.email})
     .getOne()
 
-  if (user == undefined) return [-1, ""];
-  if (user.password == account.password) return [-1, user.id];
-  else return [0, ""];
+  if (user == undefined) return [-1, "", null];
+  if (user.password == account.password) return [1, user.id, user];
+  else return [0, "", null];
 }

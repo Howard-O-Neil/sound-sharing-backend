@@ -14,6 +14,9 @@ export class Sound extends DBObject {
   original_name: string | undefined;
 
   @Column({type: "varchar", length: 1000})
+  title: string | undefined;
+
+  @Column({type: "varchar", length: 1000})
   thumbnail: string | undefined;
 
   @Column({type: "varchar", length: 1000})
